@@ -4,7 +4,14 @@ const app = express()
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
-app.post('/write', (req, res) => {
+app.get('/', (req, res) => {
+    res.writeHead(200, "Success",{
+        "Content-Type":"text/html"
+    })
+    res.write("<h1>Welcome to Express FS</h1>")
+    res.end()
+})
+app.get('/write', (req, res) => {
     let today = new Date()
     let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
     let date = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate()
@@ -14,11 +21,11 @@ app.post('/write', (req, res) => {
         if(err){
             console.log(err)
         }
-        res.send({
-            statusCode: 201,
-            message: "File created successfully"
-        })
+        res.write("File created successfully")
+        // res.write("File created")
+        res.end()
     })
+   
 })
 
 app.get('/all',(req, res) => {
