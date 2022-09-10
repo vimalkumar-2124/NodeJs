@@ -34,4 +34,4 @@ app.get('/all',(req, res) => {
     })
 })
 
-app.listen(8000, () => console.log('Server is listening to pot 8000'))
+app.listen(process.env.PORT || 8000, () => console.log(`Server is listening to pot ${process.env.PORT? process.env.PORT : 8000}`))
