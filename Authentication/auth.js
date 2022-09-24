@@ -28,6 +28,8 @@ let decodeToken = async(token) => {
     return decodeToken
 }
 
+// Middleware means will have access to the request and response cycle (i.e., main difference between normal func)
+// next keyword needs to be used
 let validity = async(req, res,next) => {
     let token = req.headers.authorization.split(' ')[1]
     let data = await decodeToken(token)
