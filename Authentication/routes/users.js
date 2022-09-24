@@ -1,9 +1,43 @@
 var express = require('express');
 var router = express.Router();
 const {mongoDb, dbName, url, mongoClient} = require('../dbConfig')
-const {hashPassword, hashCompare} = require('../auth')
+const {hashPassword, hashCompare, createToken, decodeToken, validity, adminGuard} = require('../auth')
 const client = new mongoClient(url)
 
+
+router.get('/all',adminGuard,validity, async(req,res) => {
+  await client.connect()
+  try{
+    const db = await client.db(dbName)
+    let token = req.headers.authorization.split(' ')[1]
+    // console.log(token)
+    let data = await decodeToken(token)
+    let user = await db.collection('auth').findOne({email: data.email})
+    if(user){
+      let users = await db.collection('auth').find().project({password:0}).toArray()
+      res.send({
+        statusCode:200,
+        data : users
+      })
+    }
+    else{
+      res.send({
+        statusCode: 400,
+        message : "Invalid user"
+      })
+    }
+  }
+  catch(err){
+    res.send({
+      statusCode : 500,
+      message : "Internal Server error"
+
+    })
+  }
+  finally{
+    client.close()
+  }
+})
 router.post('/signin', async(req,res) => {
   await client.connect()
   try{
@@ -12,8 +46,10 @@ router.post('/signin', async(req,res) => {
     if(user){
       const compare = hashCompare(req.body.password, user.password)
       if(compare){
+        let token = await createToken(user.email, user.role)
         res.send({
           statusCode: 200,
+          jwtToken : token,
         message:"Signin successfull"        
       })
     }
