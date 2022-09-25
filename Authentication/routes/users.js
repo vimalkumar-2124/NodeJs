@@ -81,12 +81,23 @@ router.post('/signup', async(req,res)=>{
     const db = await client.db(dbName)
     let hasshedPassword = hashPassword(req.body.password)
     req.body.password = hasshedPassword
-    let users = await db.collection('auth').insertOne(req.body)
-    res.send({
-      statusCode: 200,
-      message : "User created successfully",
-      data: users
-    })
+    let alreadyExist = await db.collection('auth').find({email:req.body.email}).toArray()
+    // console.log(alreadyExist)
+    if(alreadyExist[0]){
+      res.send({
+        message: "User already exists",
+
+      })
+    }
+    else{
+
+      let users = await db.collection('auth').insertOne(req.body)
+      res.send({
+        statusCode: 201,
+        message : "User created successfully",
+        data: users
+      })
+    }
   }
   catch(err){
     console.log(err)
